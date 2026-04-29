@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, UserCircle, Mail, Database,
-  LogOut, Menu, User, Bell, ChevronRight, ShieldCheck, GraduationCap, Briefcase
+  LogOut, Menu, User, Bell, ChevronRight, GraduationCap, Briefcase
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -53,7 +53,7 @@ const AdminLayout = () => {
     { name: 'Ambassador SGS', icon: <GraduationCap size={20} />, path: '/admin/sgs' },
     { name: 'Ambassador EGS', icon: <Briefcase size={20} />, path: '/admin/egs' },
     { name: 'Email Marketing', icon: <Mail size={20} />, path: '/admin/email' },
-    { name: 'Data Master', icon: <ShieldCheck size={20} />, path: '/admin/referensi' },
+    // { name: 'Data Master', icon: <ShieldCheck size={20} />, path: '/admin/referensi' },
   ];
 
   return (

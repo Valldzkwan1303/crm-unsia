@@ -66,6 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/status', [StudentPortalController::class, 'getStatus']);
         Route::post('/submit-test', [StudentPortalController::class, 'submitTest']);
         Route::post('/upload-payment', [StudentPortalController::class, 'uploadPayment']);
+
+        Route::post('/upload-ukt', [StudentPortalController::class, 'uploadUkt']);
     });
 
     // --- ADMIN ROUTES ---

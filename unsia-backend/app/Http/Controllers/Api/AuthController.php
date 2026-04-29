@@ -62,32 +62,32 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $request->validate(['email' => 'required|email', 'password' => 'required']);
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email atau password yang Anda masukkan salah.'], 401);
+            return response()->json(['message' => 'Salah email/password'], 401);
         }
 
-        if ($user->is_active == false) {
-            return response()->json(['message' => 'Akun Anda sedang menunggu verifikasi Admin. Mohon tunggu.'], 403);
+        $type = null;
+        if ($user->role === 'agent') {
+            $type = \DB::table('agent_profiles')->where('user_id', $user->id)->value('type');
+        } elseif (\DB::table('sgs_profiles')->where('user_id', $user->id)->exists()) {
+            $type = 'sgs';
+        } elseif (\DB::table('egs_profiles')->where('user_id', $user->id)->exists()) {
+            $type = 'egs';
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Login berhasil',
             'access_token' => $token,
-            'token_type' => 'Bearer',
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
-                'email' => $user->email,
                 'role' => $user->role,
+                'type' => $type
             ]
         ]);
     }

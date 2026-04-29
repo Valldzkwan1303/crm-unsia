@@ -44,7 +44,7 @@ export default function App() {
         <Route path="/register-agent" element={<RegisterAgent />} />
         <Route path="/join" element={<JoinPage />} />
         <Route path="/daftar" element={<JoinPage />} />
-  
+
         {/* 3. JALUR PORTAL (Berdasarkan Role) */}
         <Route path="/student/dashboard" element={<StudentDashboard />} />
 
@@ -58,7 +58,7 @@ export default function App() {
           <Route path="referensi" element={<ReferensiPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="sgs" element={<SgsPage />} />
-          <Route path="egs" element={<EgsPage />} /> 
+          <Route path="egs" element={<EgsPage />} />
         </Route>
 
         <Route path="/agent" element={<AgentLayout />}>
@@ -75,6 +75,13 @@ export default function App() {
           <Route path="dashboard" element={<SgsDashboard />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="tools" element={<MarketingKit />} />
+        </Route>
+
+        <Route path="/egs" element={<AgentLayout />}>
+          <Route index element={<Navigate to="/egs/dashboard" replace />} />
+          <Route path="dashboard" element={<AgentDashboard />} />
+          <Route path="finance" element={<AgentFinance />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* 4. CATCH-ALL (Harus Paling Bawah) */}

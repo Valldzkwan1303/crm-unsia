@@ -42,6 +42,11 @@ const PaymentPage = () => {
         const file = e.target.files?.[0];
         if (!file || !leadData) return;
 
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Ukuran foto terlalu besar! Maksimal 5MB.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append('payment_proof', file);
         setUploading(true);
@@ -81,8 +86,8 @@ const PaymentPage = () => {
                         Bukti pembayaran atas nama <strong>{leadData?.name}</strong> sudah kami terima. Admin akan memverifikasi dalam 1x24 jam.
                         Akses login akan dikirimkan ke email <strong>{leadData?.email}</strong>.
                     </p>
-                    <button 
-                        onClick={() => navigate(backPath)} 
+                    <button
+                        onClick={() => navigate(backPath)}
                         className="w-full bg-[#002855] text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:bg-blue-800 transition-all"
                     >
                         Selesai & Kembali
@@ -96,9 +101,9 @@ const PaymentPage = () => {
         <div className="min-h-screen bg-[#F8FAFC] font-sans flex flex-col items-center py-12 px-6">
             <div className="max-w-5xl w-full mb-10">
                 {/* BUTTON KEMBALI DINAMIS */}
-                <button 
-                    onClick={() => navigate(backPath)} 
-                    className="flex items-center gap-2 text-slate-400 hover:text-[#002855] font-bold transition-all" 
+                <button
+                    onClick={() => navigate(backPath)}
+                    className="flex items-center gap-2 text-slate-400 hover:text-[#002855] font-bold transition-all"
                     title="Kembali ke Halaman Partner"
                 >
                     <ArrowLeft size={20} /> Kembali ke Profil Partner

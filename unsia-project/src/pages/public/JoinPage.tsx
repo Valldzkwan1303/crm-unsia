@@ -18,7 +18,7 @@ const JoinPage = () => {
     sgs: searchParams.get('sgs'),
     egs: searchParams.get('egs'),
     partner: searchParams.get('partner'),
-    source: searchParams.get('source')
+    src: searchParams.get('src')
   };
 
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ const JoinPage = () => {
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/public/leads', {
         ...formData,
-        ...params
+        ...params 
       });
 
       const registrationCode = response.data.registration_code;
