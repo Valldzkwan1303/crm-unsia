@@ -12,13 +12,14 @@ const JoinPage = () => {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // MENGUMPULKAN SEMUA PARAMETER JALUR PENDAFTARAN
   const params = {
-    ref: searchParams.get('ref'),
+    ref: searchParams.get('ref'),    
     school: searchParams.get('school'),
-    sgs: searchParams.get('sgs'),
-    egs: searchParams.get('egs'),
-    partner: searchParams.get('partner'),
-    src: searchParams.get('src')
+    sgs: searchParams.get('sgs'),      
+    egs: searchParams.get('egs'),      
+    partner: searchParams.get('partner'), 
+    src: searchParams.get('src')       
   };
 
   const [formData, setFormData] = useState({
@@ -50,7 +51,6 @@ const JoinPage = () => {
       });
 
       const registrationCode = response.data.registration_code;
-
       navigate(`/pembayaran-pendaftaran/${registrationCode}`);
 
     } catch (error) {
@@ -62,10 +62,10 @@ const JoinPage = () => {
 
   const getHeaderInfo = () => {
     if (params.ref) return { title: 'Rekomendasi Mitra', icon: <User size={18} />, text: `Partner: ${params.ref}` };
-    if (params.sgs) return { title: 'Duta Mahasiswa', icon: <GraduationCap size={18} />, text: `NIM: ${params.sgs}` };
-    if (params.egs) return { title: 'Duta Karyawan', icon: <Briefcase size={18} />, text: `NIP: ${params.egs}` };
-    if (params.school) return { title: 'Jalur Sekolah', icon: <School size={18} />, text: params.school };
-    if (params.partner) return { title: 'Jalur Kerjasama', icon: <Landmark size={18} />, text: params.partner };
+    if (params.sgs) return { title: 'Ambassador Mahasiswa', icon: <GraduationCap size={18} />, text: `NIM: ${params.sgs}` };
+    if (params.egs) return { title: 'Ambassador Karyawan', icon: <Briefcase size={18} />, text: `NIP: ${params.egs}` };
+    if (params.school) return { title: 'Jalur Sosialisasi Sekolah', icon: <School size={18} />, text: params.school.replace(/-/g, ' ') };
+    if (params.partner) return { title: 'Jalur Kerjasama Instansi', icon: <Landmark size={18} />, text: params.partner.replace(/-/g, ' ') };
     return null;
   };
 
@@ -78,12 +78,13 @@ const JoinPage = () => {
       <form onSubmit={handleSubmitData} className="space-y-5">
         <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
 
+        {/* INFO BADGE: MENUNJUKKAN JALUR MASUK MAHASISWA */}
         {info && (
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4 text-[#002855] mb-4">
+          <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-center gap-4 text-[#002855] mb-4 animate-in fade-in slide-in-from-top-2">
             <div className="p-2.5 bg-blue-600 rounded-xl text-white shadow-lg">{info.icon}</div>
             <div>
-              <p className="text-[10px] font-black uppercase opacity-60">{info.title}</p>
-              <p className="text-sm font-black uppercase">{info.text}</p>
+              <p className="text-[10px] font-black uppercase opacity-60 leading-none mb-1">{info.title}</p>
+              <p className="text-sm font-black uppercase tracking-tight">{info.text}</p>
             </div>
           </div>
         )}

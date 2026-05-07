@@ -1,12 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-// Layouts
 import AdminLayout from './layouts/AdminLayout';
 import AgentLayout from './layouts/AgentLayout';
 import SgsLayout from './layouts/SgsLayout';
 
-// Pages
 import LandingPage from './pages/landing/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterAgent from './pages/RegisterAgent';
@@ -28,24 +26,26 @@ import MarketingKit from './pages/agent/MarketingKit';
 import StudentDashboard from './pages/student/StudentDashboard';
 import PaymentPage from './pages/public/PaymentPage';
 import LandingPageAgent from './pages/landing/LandingPageAgent';
+import BtsPage from './pages/admin/BtsPage';
+import B2bPage from './pages/admin/B2bPage';
+import BtsLayout from './layouts/BtsLayout';
+import B2bLayout from './layouts/B2bLayout';
+import CampaignDashboard from './pages/campaign/CampaignDashboard';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-right" expand={true} richColors theme="dark" />
       <Routes>
-        {/* 1. JALUR MARKETING (Prioritas Tinggi) */}
         <Route path="/p/:agentCode" element={<LandingPageAgent />} />
         <Route path="/pembayaran-pendaftaran/:regCode" element={<PaymentPage />} />
 
-        {/* 2. JALUR PUBLIC */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register-agent" element={<RegisterAgent />} />
         <Route path="/join" element={<JoinPage />} />
         <Route path="/daftar" element={<JoinPage />} />
 
-        {/* 3. JALUR PORTAL (Berdasarkan Role) */}
         <Route path="/student/dashboard" element={<StudentDashboard />} />
 
         <Route path="/admin" element={<AdminLayout />}>
@@ -53,6 +53,8 @@ export default function App() {
           <Route path="dashboard" element={<DashboardHome />} />
           <Route path="kanal" element={<KanalPage />} />
           <Route path="crm" element={<CRMPage />} />
+          <Route path="bts" element={<BtsPage />} />
+          <Route path="b2b" element={<B2bPage />} />
           <Route path="agen" element={<AgenPage />} />
           <Route path="email" element={<EmailPage />} />
           <Route path="referensi" element={<ReferensiPage />} />
@@ -84,7 +86,18 @@ export default function App() {
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
-        {/* 4. CATCH-ALL (Harus Paling Bawah) */}
+        {/* RUTE UNTUK PETUGAS BTS */}
+        <Route path="/bts" element={<BtsLayout />}>
+          <Route index element={<Navigate to="/bts/dashboard" replace />} />
+          <Route path="dashboard" element={<CampaignDashboard />} />
+        </Route>
+
+        {/* RUTE UNTUK PIC KERJASAMA B2B */}
+        <Route path="/b2b" element={<B2bLayout />}>
+          <Route index element={<Navigate to="/b2b/dashboard" replace />} />
+          <Route path="dashboard" element={<CampaignDashboard />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import {
-  LayoutDashboard, Users, UserCircle, Mail, Database,
-  LogOut, Menu, User, Bell, ChevronRight, GraduationCap, Briefcase
+import { 
+  LayoutDashboard, Users, Briefcase, GraduationCap, Mail, Layers, 
+  UserCheck, School, Building2, ChevronRight, LogOut, Menu, Bell, User
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -12,7 +12,7 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userData, setUserData] = useState({ name: 'Admin', avatar: '' });
 
-  
+
   const [notifCount, setNotifCount] = useState(0);
   const [notifs, setNotifs] = useState<any[]>([]);
   const [showNotif, setShowNotif] = useState(false);
@@ -46,14 +46,15 @@ const AdminLayout = () => {
   }, [navigate]);
 
   const menuItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
-    { name: 'Kanal Pendaftaran', icon: <Database size={20} />, path: '/admin/kanal' },
-    { name: 'CRM Leads', icon: <Users size={20} />, path: '/admin/crm' },
-    { name: 'Mitra Umum', icon: <UserCircle size={20} />, path: '/admin/agen' },
-    { name: 'Ambassador SGS', icon: <GraduationCap size={20} />, path: '/admin/sgs' },
-    { name: 'Ambassador EGS', icon: <Briefcase size={20} />, path: '/admin/egs' },
-    { name: 'Email Marketing', icon: <Mail size={20} />, path: '/admin/email' },
-    // { name: 'Data Master', icon: <ShieldCheck size={20} />, path: '/admin/referensi' },
+    { name: 'Dashboard', icon: <LayoutDashboard />, path: '/admin/dashboard' },
+    { name: 'CRM Leads', icon: <Users />, path: '/admin/crm' },
+    { name: 'Kanal Pendaftaran', icon: <Layers />, path: '/admin/kanal' },
+    { name: 'Mitra Umum', icon: <Briefcase />, path: '/admin/agen' },
+    { name: 'Ambassador SGS', icon: <GraduationCap />, path: '/admin/sgs' },
+    { name: 'Ambassador EGS', icon: <UserCheck />, path: '/admin/egs' },
+    { name: 'Back to School', icon: <School />, path: '/admin/bts' },
+    { name: 'Kerjasama B2B', icon: <Building2 />, path: '/admin/b2b' },
+    { name: 'Email Marketing', icon: <Mail />, path: '/admin/email' },
   ];
 
   return (

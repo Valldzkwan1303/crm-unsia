@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CampaignLocation;
 
 class Lead extends Model
 {
@@ -16,6 +17,9 @@ class Lead extends Model
         'prodi_interest',
         'channel_id',
         'agent_id',
+        'location_id',
+        'school_origin',
+        'partner_origin',
         'source_platform',
         'registration_code',
         'registration_fee_proof',
@@ -29,6 +33,12 @@ class Lead extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    // TAMBAHKAN RELASI INI BIAR CRM BISA BACA NAMA SEKOLAH DARI TABEL HISTORY
+    public function location()
+    {
+        return $this->belongsTo(CampaignLocation::class, 'location_id');
     }
 
     public function channel()

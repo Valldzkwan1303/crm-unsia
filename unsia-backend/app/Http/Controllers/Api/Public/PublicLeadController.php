@@ -24,39 +24,70 @@ class PublicLeadController extends Controller
 
         return DB::transaction(function () use ($request) {
             $agentId = null;
+            $locationId = null;
             $channelId = 1;
-
+            $schoolOrigin = $request->input('school');
+            $partnerOrigin = $request->input('partner');
+            $locSlug = $request->input('loc');
             $ref = $request->input('ref');
-            $source = $request->input('src') ?? $request->input('source') ?? 'direct';
 
-            $partner = AgentProfile::where('referral_code', $ref)->first();
-            if ($ref) {
-                $sgs = DB::table('sgs_profiles')->where('nim', $ref)->first();
-                if ($sgs) {
-                    $agentId = $sgs->user_id;
-                    $channelId = 4;
+            if ($locSlug) {
+                $campaign = DB::table('campaign_locations')->where('location_slug', $locSlug)->first();
+                if ($campaign) {
+                    $locationId = $campaign->id;
+                    $agentId = $campaign->user_id;
+                    $channelId = ($campaign->type === 'bts') ? 3 : 6;
+                    $schoolOrigin = ($campaign->type === 'bts') ? $campaign->location_name : null;
+                    $partnerOrigin = ($campaign->type === 'b2b') ? $campaign->location_name : null;
                 }
-                if (!$agentId) {
-                    $egs = DB::table('egs_profiles')->where('nip', $ref)->first();
-                    if ($egs) {
-                        $agentId = $egs->user_id;
-                        $channelId = 5;
+            }
+
+            if (!$locationId && $ref) {
+                $user = User::whereHas('agentProfile', function ($q) use ($ref) {
+                    $q->where('referral_code', $ref); })
+                    ->orWhereHas('egsProfile', function ($q) use ($ref) {
+                        $q->where('nip', $ref); })
+                    ->orWhereHas('sgsProfile', function ($q) use ($ref) {
+                        $q->where('nim', $ref); })
+                    ->orWhereHas('btsProfile', function ($q) use ($ref) {
+                        $q->where('bts_id', $ref); })
+                    ->orWhereHas('b2bProfile', function ($q) use ($ref) {
+                        $q->where('b2b_id', $ref); })
+                    ->first();
+
+                if ($user) {
+                    $agentId = $user->id;
+                    if ($schoolOrigin)
+                        $channelId = 3;
+                    elseif ($partnerOrigin)
+                        $channelId = 6;
+                    else {
+                        $channelId = ($user->role === 'sgs') ? 4 : (($user->role === 'egs') ? 5 : 2);
                     }
-                }
-                if (!$agentId) {
-                    $partner = AgentProfile::where('referral_code', $ref)->first();
-                    if ($partner) {
-                        $agentId = $partner->user_id;
-                        if ($partner->type === 'sgs')
-                            $channelId = 4;
-                        elseif ($partner->type === 'egs')
-                            $channelId = 5;
-                        else
-                            $channelId = 2;
+
+                    if ($schoolOrigin || $partnerOrigin) {
+                        $locName = $schoolOrigin ?? $partnerOrigin;
+
+                        $existingLoc = DB::table('campaign_locations')
+                            ->where('user_id', $agentId)
+                            ->where('location_name', $locName)
+                            ->first();
+
+                        if (!$existingLoc) {
+                            $locationId = DB::table('campaign_locations')->insertGetId([
+                                'user_id' => $agentId,
+                                'type' => $schoolOrigin ? 'bts' : 'b2b',
+                                'location_name' => $locName,
+                                'location_slug' => Str::slug($locName) . '-' . Str::random(5),
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                        } else {
+                            $locationId = $existingLoc->id;
+                        }
                     }
                 }
             }
-            $regCode = 'REG-' . strtoupper(Str::random(10));
 
             $lead = Lead::create([
                 'name' => $request->name,
@@ -65,12 +96,18 @@ class PublicLeadController extends Controller
                 'prodi_interest' => $request->prodi_interest,
                 'agent_id' => $agentId,
                 'channel_id' => $channelId,
-                'registration_code' => $regCode,
-                'source_platform' => strtolower($source),
+                'location_id' => $locationId,
+                'school_origin' => $schoolOrigin,
+                'partner_origin' => $partnerOrigin,
+                'registration_code' => 'REG-' . strtoupper(Str::random(10)),
+                'source_platform' => strtolower($request->input('src') ?? 'direct'),
                 'status' => 'lead'
             ]);
 
-            return response()->json(['status' => 'success', 'registration_code' => $regCode, 'data' => $lead], 201);
+            if ($locationId)
+                DB::table('campaign_locations')->where('id', $locationId)->increment('total_leads');
+
+            return response()->json(['status' => 'success', 'registration_code' => $lead->registration_code], 201);
         });
     }
 

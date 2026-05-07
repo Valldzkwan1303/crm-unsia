@@ -76,4 +76,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Lead::class, 'egs_id');
     }
+
+    public function btsProfile()
+    {
+        return $this->hasOne(BtsProfile::class, 'user_id');
+    }
+
+    public function b2bProfile()
+    {
+        return $this->hasOne(B2bProfile::class, 'user_id');
+    }
 }
