@@ -17,8 +17,8 @@ const KanalPage = () => {
   
   const [activeMode, setActiveMode] = useState<string | null>(null);
   const [selectedPartner, setSelectedPartner] = useState<any>(null);
-  const [partnerHistory, setPartnerHistory] = useState([]); // Untuk menyimpan list sekolah lama
-  const [isAddingNew, setIsAddingNew] = useState(false); // Toggle antara pilih history atau ketik baru
+  const [partnerHistory, setPartnerHistory] = useState([]); 
+  const [isAddingNew, setIsAddingNew] = useState(false); 
   const [textInput, setTextInput] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
