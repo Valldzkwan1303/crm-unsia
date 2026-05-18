@@ -62,7 +62,7 @@ const AgentDashboard = () => {
         agent_type: 'umum'
     });
 
-    const COLORS = ['#002855', '#3B82F6', '#25D366', '#E1306C', '#8B5CF6'];
+    const COLORS = ['#002855', '#3B82F6', '#0EA5E9', '#8B5CF6', '#25D366'];
 
     const shareOptions = [
         { name: 'WhatsApp', icon: <MessageCircle size={20} />, color: 'bg-[#25D366]', slug: 'whatsapp' },
@@ -107,7 +107,7 @@ const AgentDashboard = () => {
             await api.put(`/admin/leads/${id}/activate`);
             toast.success("Akun diaktifkan!");
             fetchData();
-        } catch (e) { toast.error("Gagal mengaktifkan akun"); }
+        } catch { toast.error("Gagal mengaktifkan akun"); }
     };
 
     const handleChatWA = (phone: string, name: string) => {
@@ -165,12 +165,13 @@ const AgentDashboard = () => {
     const isEGS = stats.agent_type === 'egs';
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 pb-10">
+        <div className="space-y-8 pb-10">
 
             {/* 1. WELCOME BANNER */}
-            <div className="bg-gradient-to-br from-[#002855] to-blue-700 p-10 rounded-[3rem] text-white shadow-xl shadow-blue-900/20 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#002855] via-blue-800 to-blue-600 p-8 md:p-10 rounded-[2.5rem] text-white shadow-xl shadow-blue-900/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl -mr-20 -mt-20"></div>
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="space-y-4 text-center md:text-left">
+                    <div className="space-y-4 text-center md:text-left w-full md:w-auto">
                         <div className="flex items-center justify-center md:justify-start gap-3">
                             <div className="p-2 bg-white/10 rounded-xl backdrop-blur-md">
                                 {isSGS ? <GraduationCap size={24} /> : isEGS ? <Users size={24} /> : <Briefcase size={24} />}
@@ -180,18 +181,45 @@ const AgentDashboard = () => {
                             </span>
                         </div>
                         <h1 className="text-4xl font-black tracking-tight">Halo, {stats.agent_name}!</h1>
-                        <p className="text-blue-100 font-medium max-w-md italic">
+                        <p className="text-blue-100 font-medium max-w-md italic text-sm md:text-base">
                             {isEGS ? '"Kontribusi Anda sebagai karyawan membangun masa depan digital UNSIA."' : isSGS ? '"Bantu temanmu kuliah, kumpulkan poin beasiswamu."' : '"Pantau performa referral dan buat link pelacak otomatis Anda."' }
                         </p>
-                        <button type="button" onClick={() => setShowLinkModal(true)} className="bg-white text-[#002855] px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg hover:bg-yellow-400 transition-all flex items-center gap-2 mt-4 mx-auto md:mx-0">
-                            <Share2 size={16} /> Bagikan Link Pendaftaran
+                        <button type="button" onClick={() => setShowLinkModal(true)} className="bg-white text-[#002855] px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-lg hover:shadow-2xl hover:-translate-y-1 hover:bg-yellow-400 hover:text-[#002855] transition-all duration-500 flex items-center justify-center md:justify-start gap-3 mt-4 mx-auto md:mx-0 w-full md:w-auto">
+                            <Share2 size={18} /> Bagikan Link Pendaftaran
                         </button>
                     </div>
-                    <div className="bg-white p-4 rounded-[2rem] shadow-2xl flex flex-col items-center gap-3 group">
-                        <QRCodeSVG id="agent-qr" value={referral_link} size={120} />
-                        <button type="button" onClick={downloadQRCode} className="text-[10px] font-black text-blue-600 uppercase flex items-center gap-1 hover:text-blue-800 transition-colors" title="Download Kode QR">
-                            <Download size={12} /> Unduh QR
+                    <div className="bg-white p-6 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4 group w-full md:w-auto transform hover:scale-105 transition-all duration-500 border border-slate-100">
+                        <div className="p-2 border-2 border-slate-50 rounded-2xl">
+                            <QRCodeSVG id="agent-qr" value={referral_link} size={140} />
+                        </div>
+                        <button type="button" onClick={downloadQRCode} className="w-full py-2.5 bg-blue-50 rounded-xl text-[10px] font-black text-blue-600 uppercase flex justify-center items-center gap-2 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm" title="Download Kode QR">
+                            <Download size={14} /> Unduh QR
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* STATISTICS CARDS (NEW) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
+                    <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><DollarSign size={24} /></div>
+                    <div>
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Saldo Tersedia</p>
+                        <h3 className="text-2xl font-black text-emerald-600 mt-1">{formatRupiah(stats.commission_balance)}</h3>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
+                    <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><Users size={24} /></div>
+                    <div>
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Total Referral</p>
+                        <h3 className="text-2xl font-black text-[#002855] mt-1">{counts.total} Orang</h3>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
+                    <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl"><Loader2 size={24} /></div>
+                    <div>
+                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Pending Comm.</p>
+                        <h3 className="text-2xl font-black text-amber-600 mt-1">{formatRupiah(data?.referrals?.filter((r: any) => ['lead', 'calon_mahasiswa', 'test_passed', 'awaiting_payment'].includes(r.status)).reduce((acc: number, curr: any) => acc + (curr.commission_potential || 0), 0) || 0)}</h3>
                     </div>
                 </div>
             </div>
@@ -271,6 +299,54 @@ const AgentDashboard = () => {
                 </div>
             </div>
 
+            {/* RECENT ACTIVITY & PROMO */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* Recent Activity */}
+                <div className="lg:col-span-8 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-black text-[#002855] uppercase tracking-tight">Aktivitas Terbaru</h3>
+                        <span className="text-[10px] text-blue-600 font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">Live</span>
+                    </div>
+                    <div className="space-y-4">
+                        {data?.referrals?.slice(0, 5).map((r: any, i: number) => {
+                            const maskedName = r.name.substring(0, r.name.indexOf(' ') > -1 ? r.name.indexOf(' ') + 2 : 4) + '***';
+                            return (
+                                <div key={i} className="flex justify-between items-center p-4 border border-slate-50 rounded-2xl bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 bg-white border border-slate-100 rounded-xl flex items-center justify-center text-blue-600 shadow-sm font-black uppercase">{r.name.charAt(0)}</div>
+                                        <div>
+                                            <p className="font-bold text-[#002855] text-sm">{maskedName}</p>
+                                            <p className="text-[10px] text-slate-400 uppercase tracking-widest">{r.prodi || 'Program Studi'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className={`text-[10px] px-3 py-1 rounded-full inline-block font-black uppercase ${r.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>{r.status === 'active' ? 'Berhasil' : 'Proses'}</p>
+                                        <p className="text-[9px] text-slate-400 mt-1 uppercase tracking-widest">{r.date}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {(!data?.referrals || data.referrals.length === 0) && (
+                            <p className="text-center text-slate-400 text-xs italic py-8">Belum ada aktivitas.</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Promo Banner */}
+                <div className="lg:col-span-4 relative bg-gradient-to-br from-amber-400 to-orange-500 rounded-[2.5rem] p-8 text-white shadow-xl shadow-orange-500/20 flex flex-col justify-between overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-3xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-600/30 rounded-full blur-2xl -ml-10 -mb-10"></div>
+                    <div className="relative z-10">
+                        <span className="bg-white/20 border border-white/30 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md">Promo Spesial</span>
+                        <h3 className="text-2xl font-black mt-6 mb-3 leading-tight tracking-tight">Bonus Reward<br/>Bulan Ini!</h3>
+                        <p className="text-xs font-medium text-white/90 leading-relaxed">Tier komisi naik otomatis: <strong className="text-white">Rp 500.000</strong> per maba (aktif &lt;25), naik menjadi <strong className="text-white">Rp 700.000</strong> setelah 25 maba aktif.</p>
+                    </div>
+                    <button onClick={() => navigate('/agent/tools')} className="relative z-10 mt-8 w-full py-4 bg-white text-orange-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-orange-50 transition-colors shadow-lg shadow-black/10 flex items-center justify-center gap-2">
+                        Cek Detail Promo <ArrowRight size={14} />
+                    </button>
+                </div>
+            </div>
+
             {/* 4. MONITORING TABLE DENGAN TAB FILTERING */}
             <div className="bg-white border border-slate-100 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-blue-900/5">
                 <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white">
@@ -289,7 +365,7 @@ const AgentDashboard = () => {
                             <button
                                 key={t.id}
                                 type="button"
-                                onClick={() => setActiveTab(t.id as any)}
+                                onClick={() => setActiveTab(t.id as 'semua' | 'berhasil' | 'proses' | 'gagal')}
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all whitespace-nowrap ${activeTab === t.id ? 'bg-white shadow-sm ring-1 ring-black/5 text-[#002855]' : 'text-slate-400 hover:text-slate-600'}`}
                                 title={`Filter ${t.label}`}
                             >
@@ -350,7 +426,7 @@ const AgentDashboard = () => {
             {/* MODAL: PREVIEW BUKTI */}
             {showProofModal && (
                 <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-4 shadow-2xl relative animate-in zoom-in-95">
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-4 shadow-2xl relative">
                         <button type="button" onClick={() => setShowProofModal(false)} className="absolute -top-4 -right-4 p-3 bg-red-500 text-white rounded-2xl shadow-xl hover:bg-red-600 transition-all" title="Tutup Bukti"><X size={20} /></button>
                         <div className="p-2 text-center">
                             <img src={`http://127.0.0.1:8000/storage/${selectedProof}`} alt="Bukti Transfer" className="w-full h-auto rounded-[2rem] shadow-inner max-h-[70vh] object-contain" />
@@ -362,8 +438,8 @@ const AgentDashboard = () => {
 
             {/* MODAL: SHARE AUTO */}
             {showLinkModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#002855]/20 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-100 animate-in zoom-in-95">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#002855]/20 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-md rounded-[3rem] p-10 shadow-2xl border border-slate-100">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-2xl font-black text-[#002855] uppercase tracking-tight">Bagikan Link</h3>
                             <button type="button" title="Tutup Modal" onClick={() => { setShowLinkModal(false); setGeneratedLink(''); }} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><X size={24} /></button>

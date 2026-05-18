@@ -54,6 +54,20 @@ class DashboardController extends Controller
             ->filter(fn($item) => $item['value'] > 0)
             ->values();
 
+        // 5. LEADERBOARD TOP 5 PARTNER
+        $leaderboard = User::where('role', 'agent')
+            ->withCount('leads')
+            ->with('wallet')
+            ->get()
+            ->map(fn($agent) => [
+                'name' => $agent->name,
+                'leads_count' => $agent->leads_count,
+                'commission' => $agent->wallet ? (float)$agent->wallet->balance : 0,
+            ])
+            ->sortByDesc('leads_count')
+            ->take(5)
+            ->values();
+
         return response()->json([
             'stats' => [
                 'total_leads' => $totalLeads,
@@ -63,7 +77,8 @@ class DashboardController extends Controller
             ],
             'source_data' => $sourceData,
             'channel_data' => $channelData,
-            'agent_performance' => $agentPerformance
+            'agent_performance' => $agentPerformance,
+            'leaderboard' => $leaderboard
         ]);
     }
 }

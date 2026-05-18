@@ -4,8 +4,10 @@ import Footer from '../../components/Footer';
 import HeroSection from "../../sections/general/HeroSection";
 import AdvantageSection from "../../sections/general/AdvantageSection";
 import ProgramsSection from "../../sections/general/ProgramsSection";
+import PersyaratanSection from "../../sections/general/PersyaratanSection";
 import RegistrationSteps from "../../sections/general/RegistrationSteps";
 import NewsSection from "../../sections/general/NewsSection";
+import KonsultasiSection from "../../sections/general/KonsultasiSection";
 import SupportSection from "../../sections/general/SupportSection";
 
 export default function LandingPage() {
@@ -15,10 +17,12 @@ export default function LandingPage() {
       <HeroSection />
       <AdvantageSection />
       <ProgramsSection />
+      <PersyaratanSection />
       <RegistrationSteps />
       <NewsSection />
+      <KonsultasiSection />
       <SupportSection />
       <Footer />
     </div>
   );
-}
+}

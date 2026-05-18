@@ -8,9 +8,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#002855] rounded-xl flex items-center justify-center text-white font-black text-xl">U</div>
-              <span className="font-black text-xl text-[#002855] tracking-tighter uppercase">Universitas Siber Asia</span>
+            <div className="flex items-center">
+              <img src="/src/assets/logounsia.png" alt="Logo UNSIA" className="h-12 object-contain" />
             </div>
             <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-sm italic">
               "Menghadirkan pendidikan tinggi siber berkualitas dunia yang fleksibel, terjangkau, dan diakui secara global untuk masa depan digital Anda."

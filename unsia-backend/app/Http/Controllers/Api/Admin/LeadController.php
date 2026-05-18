@@ -111,6 +111,45 @@ class LeadController extends Controller
     }
 
 
+    /**
+     * Tambah Prospek dari Dashboard Admin (ringan — hanya simpan ke tabel leads).
+     * Tidak membuat User baru. Email bersifat opsional.
+     */
+    public function storeProspek(Request $request)
+    {
+        $request->validate([
+            'name'           => 'required|string|max:255',
+            'email'          => 'nullable|email|unique:leads,email',
+            'phone'          => 'required|string|max:20',
+            'prodi_interest' => 'required|string|max:255',
+        ]);
+
+        try {
+            // Auto-generate kode registrasi unik: REG-YYYY-XXXXX
+            do {
+                $regCode = 'REG-' . date('Y') . '-' . strtoupper(Str::random(5));
+            } while (Lead::where('registration_code', $regCode)->exists());
+
+            $lead = Lead::create([
+                'name'              => $request->name,
+                'email'             => $request->email ?? null,
+                'phone'             => $request->phone,
+                'prodi_interest'    => $request->prodi_interest,
+                'registration_code' => $regCode,
+                'source_platform'   => 'Admin Panel',
+                'status'            => 'New',
+                'notes'             => 'Manual oleh Admin Dashboard',
+            ]);
+
+            return response()->json([
+                'message' => 'Prospek berhasil ditambahkan.',
+                'data'    => $lead,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function store(Request $request)
     {
         $request->validate([

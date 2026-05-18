@@ -11,8 +11,12 @@ return new class extends Migration {
     public function up()
     {
         Schema::table('leads', function (Blueprint $table) {
-            $table->integer('test_score')->nullable()->after('status');
-            $table->json('test_results')->nullable()->after('test_score');
+            if (!Schema::hasColumn('leads', 'test_score')) {
+                $table->integer('test_score')->nullable()->after('status');
+            }
+            if (!Schema::hasColumn('leads', 'test_results')) {
+                $table->json('test_results')->nullable()->after('test_score');
+            }
         });
     }
 

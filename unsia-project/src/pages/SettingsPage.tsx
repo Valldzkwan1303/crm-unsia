@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { User, Loader2, Camera, ArrowLeft, Lock, CheckCircle, Fingerprint } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { User, Loader2, Camera, ArrowLeft, Lock, CheckCircle, Fingerprint, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -8,6 +8,10 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(false);
   const [userRole, setUserRole] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [showOldPass, setShowOldPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfPass, setShowConfPass] = useState(false);
   
   const [profile, setProfile] = useState({
     name: '',
@@ -37,7 +41,7 @@ const SettingsPage = () => {
     message: '',
   });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const role = localStorage.getItem('userRole');
       setUserRole(role || '');
@@ -50,16 +54,16 @@ const SettingsPage = () => {
           phone: response.data.agent_profile?.phone || '',
           area: response.data.agent_profile?.area || '',
           referral_code: response.data.agent_profile?.referral_code || '',
-          avatar: response.data.avatar ? `http://127.0.0.1:8000/storage/${response.data.avatar}` : ''
+          avatar: response.data.avatar_url || ''
       });
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    void fetchData();
+  }, [fetchData]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files[0] == null) return;
@@ -76,6 +80,7 @@ const SettingsPage = () => {
         onClose: () => window.location.reload()
       });
     } catch (error) {
+      console.error(error);
       setModalAction({ show: true, type: 'error', title: 'Gagal Upload', message: 'Ukuran foto maksimal 2MB.' });
     } finally { setLoading(false); }
   };
@@ -94,6 +99,7 @@ const SettingsPage = () => {
         onClose: () => fetchData()
       });
     } catch (error) {
+      console.error(error);
       setModalAction({ show: true, type: 'error', title: 'Gagal Simpan', message: 'Cek kembali data Anda.' });
     } finally { setLoading(false); }
   };
@@ -109,7 +115,8 @@ const SettingsPage = () => {
         message: 'Kode Referral Anda telah berubah.',
         onClose: () => fetchData()
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error(error);
       setModalAction({ show: true, type: 'error', title: 'Gagal', message: 'Kode sudah digunakan.' });
     }
   };
@@ -121,13 +128,15 @@ const SettingsPage = () => {
       await api.post('/profile/password', pass);
       setPass({ current_password: '', new_password: '', new_password_confirmation: '' });
       setModalAction({ show: true, type: 'success', title: 'Password Diganti', message: 'Keamanan akun Anda diperbarui.' });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      console.error(error);
       setModalAction({ show: true, type: 'error', title: 'Gagal', message: 'Password lama salah.' });
     } finally { setLoading(false); }
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-700 pb-20">
+    <div className="bg-[#F8FAFC] min-h-screen p-4 md:p-8 space-y-8 animate-in fade-in duration-700 text-left -mx-4 md:-mx-8 -mt-4 md:-mt-8">
+      <div className="max-w-5xl mx-auto space-y-8 pb-20">
       <div className="flex items-center gap-4">
         <button onClick={() => navigate(-1)} className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-[#002855] shadow-sm transition-all" title="Kembali">
           <ArrowLeft size={20} />
@@ -199,17 +208,32 @@ const SettingsPage = () => {
         <div className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-lg flex flex-col">
           <div className="flex items-center gap-3 mb-10"><div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><Lock size={20}/></div><h3 className="text-xl font-black text-[#002855] uppercase">Keamanan</h3></div>
           <form onSubmit={handleChangePassword} className="space-y-6">
-            <div className="space-y-1">
+            <div className="space-y-1 relative">
                 <label htmlFor="p-old" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password Lama</label>
-                <input id="p-old" type="password" required className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.current_password} onChange={e => setPass({...pass, current_password: e.target.value})} placeholder="••••••••" />
+                <div className="relative">
+                  <input id="p-old" type={showOldPass ? "text" : "password"} required className="w-full bg-slate-50 border-none rounded-2xl p-4 pr-12 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.current_password} onChange={e => setPass({...pass, current_password: e.target.value})} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowOldPass(!showOldPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                    {showOldPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 relative">
                 <label htmlFor="p-new" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password Baru</label>
-                <input id="p-new" type="password" required className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.new_password} onChange={e => setPass({...pass, new_password: e.target.value})} placeholder="••••••••" />
+                <div className="relative">
+                  <input id="p-new" type={showNewPass ? "text" : "password"} required className="w-full bg-slate-50 border-none rounded-2xl p-4 pr-12 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.new_password} onChange={e => setPass({...pass, new_password: e.target.value})} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowNewPass(!showNewPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                    {showNewPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 relative">
                 <label htmlFor="p-conf" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Konfirmasi</label>
-                <input id="p-conf" type="password" required className="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.new_password_confirmation} onChange={e => setPass({...pass, new_password_confirmation: e.target.value})} placeholder="••••••••" />
+                <div className="relative">
+                  <input id="p-conf" type={showConfPass ? "text" : "password"} required className="w-full bg-slate-50 border-none rounded-2xl p-4 pr-12 text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10" value={pass.new_password_confirmation} onChange={e => setPass({...pass, new_password_confirmation: e.target.value})} placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowConfPass(!showConfPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors">
+                    {showConfPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
             </div>
             <button type="submit" disabled={loading} className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-emerald-700 transition-all">{loading ? <Loader2 className="animate-spin mx-auto" size={18}/> : 'Update Password'}</button>
           </form>
@@ -228,6 +252,7 @@ const SettingsPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

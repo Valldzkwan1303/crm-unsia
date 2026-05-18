@@ -51,41 +51,48 @@ class AgentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'phone' => 'required',
-            'area' => 'required',
-            'type' => 'required|in:umum,sgs,egs',
-            'nim' => 'required_if:type,sgs'
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:20',
+            'area'  => 'required|string|max:255',
+            'type'  => 'nullable|in:umum,sgs,egs',
+            'nim'   => 'required_if:type,sgs|nullable|string|max:50',
         ]);
 
         try {
             DB::transaction(function () use ($request) {
                 $user = User::create([
-                    'name' => $request->name,
-                    'email' => $request->email,
-                    'password' => Hash::make('password123'),
-                    'role' => 'agent',
-                    'is_active' => true
+                    'name'      => $request->name,
+                    'email'     => $request->email,
+                    'password'  => Hash::make('password123'),
+                    'role'      => 'agent',
+                    'is_active' => true,
                 ]);
 
-                $refCode = 'REF-' . strtoupper(substr(str_replace(' ', '', $request->name), 0, 3)) . '-' . rand(100, 999);
+                // Generate referral code yang unik
+                $prefix  = strtoupper(substr(str_replace([' ', '-'], '', $request->name), 0, 3));
+                $refCode = 'REF-' . $prefix . '-' . strtoupper(\Illuminate\Support\Str::random(5));
 
                 AgentProfile::create([
-                    'user_id' => $user->id,
-                    'type' => $request->type,
-                    'nim' => $request->nim,
-                    'phone' => $request->phone,
-                    'area' => $request->area,
-                    'referral_code' => $refCode
+                    'user_id'      => $user->id,
+                    'type'         => $request->type ?? 'umum',
+                    'nim'          => $request->nim,
+                    'phone'        => $request->phone,
+                    'area'         => $request->area,
+                    'referral_code' => $refCode,
                 ]);
 
-                Wallet::create(['user_id' => $user->id, 'balance' => 0]);
+                Wallet::create([
+                    'user_id'         => $user->id,
+                    'balance'         => 0,
+                    'pending_balance' => 0,
+                ]);
             });
 
             return response()->json(['message' => 'Data berhasil disimpan']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal: ' . $e->getMessage()], 500);
+            \Log::error('AgentController@store error: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menyimpan data: ' . $e->getMessage()], 500);
         }
     }
 

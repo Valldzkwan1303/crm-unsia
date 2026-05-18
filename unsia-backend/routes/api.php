@@ -14,7 +14,6 @@ use App\Http\Controllers\Api\Admin\LeadController;
 use App\Http\Controllers\Api\Admin\AgentController;
 use App\Http\Controllers\Api\Admin\ChannelController;
 use App\Http\Controllers\Api\Admin\ReferenceController;
-use App\Http\Controllers\Api\Admin\CampaignController;
 use App\Http\Controllers\Api\Admin\SgsController;
 use App\Http\Controllers\Api\Admin\EgsController;
 use App\Http\Controllers\Api\Admin\BtsController;
@@ -23,7 +22,7 @@ use App\Http\Controllers\Api\Agent\CampaignLocationController;
 
 use App\Http\Controllers\Api\Agent\DashboardController as AgentDashboard;
 use App\Http\Controllers\Api\Agent\FinanceController as AgentFinance;
-use App\Http\Controllers\Api\Agent\MarketingKitController;
+use App\Http\Controllers\Api\Agent\MarketingAssetController;
 use App\Http\Controllers\Api\Agent\AgentProfileController;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -63,6 +62,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/leads/export', [LeadController::class, 'export']);
         Route::put('/leads/{id}/activate', [LeadController::class, 'activateAccount']);
         Route::put('/leads/{id}/sahkan', [LeadController::class, 'sahkanMahasiswa']);
+        // Endpoint ringan untuk form Tambah Prospek di Dashboard (email opsional, tanpa buat User)
+        Route::post('/prospects', [LeadController::class, 'storeProspek']);
         Route::apiResource('/leads', LeadController::class);
 
         Route::apiResource('bts', BtsController::class);
@@ -88,7 +89,6 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::apiResource('/channels', ChannelController::class);
-        Route::apiResource('/campaigns', CampaignController::class);
         Route::apiResource('/references', ReferenceController::class);
     });
 
@@ -97,7 +97,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/finance', [AgentFinance::class, 'index']);
         Route::post('/bank', [AgentFinance::class, 'updateBank']);
         Route::post('/withdraw', [AgentFinance::class, 'withdraw']);
-        Route::get('/marketing-kits', [MarketingKitController::class, 'index']);
+        Route::get('/marketing-assets', [MarketingAssetController::class, 'index']);
+        Route::get('/faqs', [\App\Http\Controllers\Api\FaqController::class, 'index']);
+        Route::post('/faqs/{id}/feedback', [\App\Http\Controllers\Api\FaqController::class, 'feedback']);
         Route::post('/update-referral', [AgentProfileController::class, 'updateReferralCode']);
         Route::get('/public/agent/{code}', [PublicLeadController::class, 'getAgentInfo']);
     });

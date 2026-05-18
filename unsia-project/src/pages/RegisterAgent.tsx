@@ -16,7 +16,8 @@ const RegisterAgent = () => {
     try {
       await api.post('/register-agent', formData);
       setModal({ show: true, type: 'success', title: 'Registrasi Berhasil', message: 'Data Anda telah kami terima. Mohon tunggu verifikasi Admin sebelum Anda dapat mengakses dashboard partner.' });
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       setModal({ show: true, type: 'error', title: 'Gagal Daftar', message: err.response?.data?.message || 'Terjadi kesalahan sistem, silakan coba lagi.' });
     } finally { setIsLoading(false); }
   };

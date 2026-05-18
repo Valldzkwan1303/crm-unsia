@@ -32,6 +32,13 @@ class User extends Authenticatable
         'is_active' => 'boolean',
     ];
 
+    protected $appends = ['avatar_url'];
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar ? url('storage/' . $this->avatar) : null;
+    }
+
     public function agentProfile()
     {
         return $this->hasOne(AgentProfile::class, 'user_id');

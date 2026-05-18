@@ -1,21 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, Users, Briefcase, GraduationCap, Mail, Layers, 
-  UserCheck, School, Building2, ChevronRight, LogOut, Menu, Bell, User
+import {
+  LayoutDashboard, Users, Briefcase, GraduationCap, Layers,
+  UserCheck, School, Building2, ChevronRight, LogOut, Menu, Bell, User, X, Search
 } from 'lucide-react';
 import api from '../api/axios';
+import LogoUnsia from '../assets/logounsia.png';
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [userData, setUserData] = useState({ name: 'Admin', avatar: '' });
-
 
   const [notifCount, setNotifCount] = useState(0);
   const [notifs, setNotifs] = useState<any[]>([]);
   const [showNotif, setShowNotif] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
 
   const fetchData = async () => {
     try {
@@ -29,7 +31,7 @@ const AdminLayout = () => {
 
       setUserData({
         name: meRes.data.name,
-        avatar: meRes.data.avatar ? `http://127.0.0.1:8000/storage/${meRes.data.avatar}` : ''
+        avatar: meRes.data.avatar_url || ''
       });
 
       setNotifCount(notifRes.data.unread_count);
@@ -41,91 +43,188 @@ const AdminLayout = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 20000); // Polling notif tiap 20 detik
+    const interval = setInterval(fetchData, 20000);
     return () => clearInterval(interval);
   }, [navigate]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotif(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const menuItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard />, path: '/admin/dashboard' },
-    { name: 'CRM Leads', icon: <Users />, path: '/admin/crm' },
-    { name: 'Kanal Pendaftaran', icon: <Layers />, path: '/admin/kanal' },
-    { name: 'Mitra Umum', icon: <Briefcase />, path: '/admin/agen' },
-    { name: 'Ambassador SGS', icon: <GraduationCap />, path: '/admin/sgs' },
-    { name: 'Ambassador EGS', icon: <UserCheck />, path: '/admin/egs' },
-    { name: 'Back to School', icon: <School />, path: '/admin/bts' },
-    { name: 'Kerjasama B2B', icon: <Building2 />, path: '/admin/b2b' },
-    { name: 'Email Marketing', icon: <Mail />, path: '/admin/email' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin/dashboard' },
+    { name: 'CRM Leads', icon: <Users size={20} />, path: '/admin/crm' },
+    { name: 'Kanal', icon: <Layers size={20} />, path: '/admin/kanal' },
+    { name: 'Agent', icon: <Briefcase size={20} />, path: '/admin/agen' },
+    { name: 'SGS', icon: <GraduationCap size={20} />, path: '/admin/sgs' },
+    { name: 'EGS', icon: <UserCheck size={20} />, path: '/admin/egs' },
+    { name: 'BTS', icon: <School size={20} />, path: '/admin/bts' },
+    { name: 'Kerjasama', icon: <Building2 size={20} />, path: '/admin/b2b' },
   ];
 
-  return (
-    <div className="flex h-screen bg-[#F8FAFC] text-slate-800 font-sans">
-      {/* SIDEBAR */}
-      <aside className={`${sidebarOpen ? 'w-72' : 'w-24'} bg-white border-r border-slate-100 transition-all duration-500 flex flex-col z-50 shadow-sm`}>
-        <div className="h-24 flex items-center px-8 border-b border-slate-50 gap-4">
-          <div className="w-10 h-10 bg-[#002855] rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-900/10">
-            <span className="text-white font-black text-lg italic">U</span>
+  const currentPage = menuItems.find(m => location.pathname.startsWith(m.path))?.name ?? 'Dashboard';
+
+  const SidebarContent = ({ onNavigate }: { onNavigate?: () => void }) => (
+    <>
+      {/* Logo Header */}
+      <div className={`h-20 flex items-center ${sidebarOpen ? 'px-6 justify-start' : 'px-0 justify-center'} border-b border-slate-100/80 gap-3 shrink-0 transition-all duration-300`}>
+        <img src={LogoUnsia} alt="UNSIA Logo" className={`${sidebarOpen ? 'h-10' : 'h-8'} w-auto object-contain transition-all duration-300`} />
+        {sidebarOpen && (
+          <div className="animate-in fade-in flex flex-col justify-center">
+            <p className="text-sm font-black tracking-tighter text-[#002855] leading-none mb-1">UNSIA</p>
+            <p className="text-[9px] text-blue-400 font-bold uppercase tracking-[0.2em] leading-none">Management System</p>
           </div>
-          {sidebarOpen && (
-            <div className="animate-in fade-in">
-              <p className="text-base font-black tracking-tighter text-[#002855]">UNSIA MARK</p>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Management</p>
-            </div>
-          )}
-        </div>
+        )}
+      </div>
 
-        <nav className="flex-1 px-4 py-8 space-y-1.5 overflow-y-auto no-scrollbar">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <button key={item.path} onClick={() => navigate(item.path)} className={`w-full flex items-center gap-4 px-5 py-4 rounded-3xl transition-all duration-300 group ${isActive ? 'bg-[#002855] text-white shadow-2xl shadow-blue-900/20' : 'text-slate-400 hover:bg-slate-50 hover:text-[#002855]'}`}>
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 overflow-y-auto no-scrollbar">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+          return (
+            <button
+              key={item.path}
+              onClick={() => { navigate(item.path); onNavigate?.(); }}
+              title={!sidebarOpen ? item.name : undefined}
+              className={`
+                w-full flex items-center gap-4 py-3.5 rounded-full transition-all duration-200 group relative mb-2
+                ${isActive
+                  ? 'bg-[#002855] text-white shadow-lg shadow-blue-900/20'
+                  : 'text-slate-500 hover:bg-blue-50 hover:text-[#002855]'
+                }
+                ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}
+              `}
+            >
+              <span className={`shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-500'} transition-colors`}>
                 {item.icon}
-                {sidebarOpen && <span className="text-sm font-bold flex-1 text-left">{item.name}</span>}
-                {isActive && sidebarOpen && <ChevronRight size={14} className="opacity-40" />}
-              </button>
-            );
-          })}
-        </nav>
+              </span>
+              {sidebarOpen && (
+                <span className="text-sm font-bold flex-1 text-left truncate">{item.name}</span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
 
-        <div className="p-6">
-          <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="flex items-center gap-4 w-full px-6 py-4 rounded-[2rem] text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all font-bold text-xs uppercase tracking-widest"><LogOut size={18} /> {sidebarOpen && 'Sign Out'}</button>
-        </div>
+      {/* Sign Out */}
+      <div className="p-4 border-t border-slate-100/80">
+        <button
+          onClick={() => { localStorage.clear(); navigate('/login'); }}
+          title={!sidebarOpen ? "Sign Out" : undefined}
+          className={`flex items-center gap-4 w-full py-3.5 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all font-bold text-xs uppercase tracking-widest ${sidebarOpen ? 'px-5' : 'px-0 justify-center'}`}
+        >
+          <LogOut size={20} />
+          {sidebarOpen && 'Sign Out'}
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex h-screen bg-[#F8FAFC] text-slate-800 font-sans overflow-hidden">
+
+      {/* ── SIDEBAR DESKTOP ── */}
+      <aside
+        className={`
+          hidden md:flex flex-col bg-white border-r border-slate-100 transition-all duration-300 z-50 shrink-0
+          ${sidebarOpen ? 'w-[280px]' : 'w-24'}
+        `}
+      >
+        <SidebarContent />
       </aside>
 
-      {/* CONTENT AREA */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-24 flex items-center justify-between px-10 bg-white/80 backdrop-blur-md border-b border-slate-50 sticky top-0 z-40 shadow-sm">
-          {/* Cari bagian header di dalam AdminLayout.tsx dan pastikan tombol menu seperti ini: */}
+      {/* ── MOBILE DRAWER BACKDROP ── */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] md:hidden animate-in fade-in"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-          <button
-            title="Toggle Sidebar"
-            aria-label="Toggle Sidebar"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-[#002855] transition-all"
-          >
-            <Menu size={20} />
-          </button>
+      {/* ── MOBILE DRAWER SIDEBAR ── */}
+      <aside
+        className={`
+          fixed top-0 left-0 h-full w-[280px] bg-white shadow-2xl z-[70] flex flex-col
+          transition-transform duration-300 md:hidden
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="absolute top-6 right-6 p-2 rounded-xl bg-slate-100 text-slate-500 hover:text-red-500 transition-colors"
+        >
+          <X size={18} />
+        </button>
+        <SidebarContent onNavigate={() => setMobileOpen(false)} />
+      </aside>
 
-          <div className="flex items-center gap-8">
-            {/* DROPDOWN NOTIFIKASI */}
-            <div className="relative">
-              <button onClick={() => setShowNotif(!showNotif)} className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-blue-600 transition-all relative">
+      {/* ── CONTENT AREA ── */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+
+        {/* TOPBAR — Glassmorphism */}
+        <header className="h-20 flex items-center justify-between px-6 md:px-8 bg-white/80 backdrop-blur-md border-b border-slate-100/80 sticky top-0 z-40 shrink-0 transition-all">
+
+          <div className="flex items-center gap-4">
+            {/* Hamburger (mobile) / Toggle sidebar (desktop) */}
+            <button
+              title="Toggle Sidebar"
+              onClick={() => {
+                if (window.innerWidth < 768) setMobileOpen(!mobileOpen);
+                else setSidebarOpen(!sidebarOpen);
+              }}
+              className="p-2.5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 rounded-xl text-slate-400 hover:text-[#002855] transition-all shadow-sm"
+            >
+              <Menu size={20} />
+            </button>
+
+            {/* Breadcrumbs */}
+            <div className="hidden sm:flex items-center gap-2 ml-2">
+              <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">Admin</span>
+              <ChevronRight size={14} className="text-slate-300" />
+              <span className="text-xs font-black text-[#002855] uppercase tracking-widest">{currentPage}</span>
+            </div>
+
+
+          </div>
+
+          <div className="flex items-center gap-4 md:gap-6">
+            {/* NOTIFICATION BELL */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotif(!showNotif)}
+                className="p-2.5 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 rounded-xl text-slate-400 hover:text-blue-600 transition-all shadow-sm relative"
+              >
                 <Bell size={20} />
-                {notifCount > 0 && <span className="absolute top-2.5 right-2.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full border-2 border-white flex items-center justify-center animate-bounce">{notifCount}</span>}
+                {notifCount > 0 && (
+                  <>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white z-10"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping opacity-75"></span>
+                  </>
+                )}
               </button>
 
               {showNotif && (
-                <div className="absolute right-0 mt-4 w-80 bg-white border border-slate-100 rounded-[2.5rem] shadow-2xl overflow-hidden z-[100] animate-in fade-in zoom-in-95">
-                  <div className="p-5 border-b border-slate-50 bg-slate-50/50">
-                    <h4 className="font-black text-[#002855] text-xs uppercase tracking-widest">Pemberitahuan</h4>
+                <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-100 rounded-3xl shadow-2xl overflow-hidden z-[100] animate-in fade-in zoom-in-95">
+                  <div className="p-4 border-b border-slate-50 bg-slate-50/80 flex items-center justify-between">
+                    <h4 className="font-black text-[#002855] text-xs uppercase tracking-widest">Notifikasi</h4>
+                    {notifCount > 0 && (
+                      <span className="text-[9px] font-black bg-red-100 text-red-600 px-2.5 py-1 rounded-full">{notifCount} Baru</span>
+                    )}
                   </div>
                   <div className="max-h-64 overflow-y-auto no-scrollbar">
                     {notifs.length === 0 ? (
-                      <p className="p-8 text-center text-xs text-slate-400 italic font-medium">Tidak ada notifikasi baru.</p>
+                      <p className="p-8 text-center text-xs text-slate-400 italic font-medium">Tidak ada notifikasi baru saat ini.</p>
                     ) : notifs.map((n, i) => (
-                      <div key={i} className="p-5 border-b border-slate-50 hover:bg-blue-50/50 transition-colors cursor-pointer">
+                      <div key={i} className="p-4 border-b border-slate-50 hover:bg-blue-50/50 transition-colors cursor-pointer">
                         <p className="text-xs font-bold text-blue-600 mb-1">{n.title}</p>
-                        <p className="text-xs text-[#002855] font-medium">{n.message}</p>
-                        <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase">{n.time}</p>
+                        <p className="text-xs text-slate-600 font-medium">{n.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-1.5 font-bold uppercase tracking-wide">{n.time}</p>
                       </div>
                     ))}
                   </div>
@@ -133,19 +232,31 @@ const AdminLayout = () => {
               )}
             </div>
 
-            {/* Profile */}
-            <div onClick={() => navigate('/admin/settings')} className="flex items-center gap-4 cursor-pointer group pl-6 border-l border-slate-100">
+            {/* PROFILE */}
+            <div
+              onClick={() => navigate('/admin/settings')}
+              className="flex items-center gap-3 cursor-pointer group pl-4 border-l border-slate-200/60"
+            >
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-black text-[#002855] group-hover:text-blue-600 transition-colors">{userData.name}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Administrator</p>
+                <p className="text-sm font-black text-[#002855] group-hover:text-blue-600 transition-colors leading-none">{userData.name}</p>
+                <p className="text-[9px] text-blue-400 font-bold uppercase tracking-widest mt-1">Administrator</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl border-2 border-white shadow-xl overflow-hidden bg-slate-100 flex items-center justify-center group-hover:border-blue-500 transition-all">
-                {userData.avatar ? <img src={userData.avatar} alt="P" className="w-full h-full object-cover" /> : <User size={20} className="text-slate-300" />}
+              <div className="w-11 h-11 rounded-full border-2 border-blue-100 shadow-sm overflow-hidden bg-blue-50 flex items-center justify-center group-hover:border-blue-400 transition-all p-0.5">
+                <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
+                    {userData.avatar
+                      ? <img src={userData.avatar} alt="Profile" className="w-full h-full object-cover" />
+                      : <User size={20} className="text-blue-400" />
+                    }
+                </div>
               </div>
             </div>
           </div>
         </header>
-        <main className="p-10 overflow-y-auto no-scrollbar"><Outlet /></main>
+
+        {/* MAIN CONTENT */}
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto no-scrollbar bg-[#F8FAFC]">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

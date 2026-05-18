@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { 
   Share2, Loader2, Link as LinkIcon, 
-  Copy, Check, X, Users, GraduationCap, School, Building2, Briefcase, Download, QrCode, Clock, Plus 
+  Copy, Check, X, Users, GraduationCap, School, Building2, Briefcase, Download, QrCode, Clock, Plus, Search, ChevronRight
 } from 'lucide-react';
 import api from '../../api/axios';
 import { toast } from 'sonner';
@@ -22,6 +22,7 @@ const KanalPage = () => {
   const [textInput, setTextInput] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -124,88 +125,152 @@ const KanalPage = () => {
     setIsAddingNew(false); setTextInput(''); setGeneratedLink('');
   };
 
-  if (loading) return <div className="p-20 flex justify-center"><Loader2 className="animate-spin text-blue-600" size={40}/></div>;
+  const channels = [
+    { name: 'Umum', desc: 'Website & Iklan Utama', icon: <Share2 size={24} />, color: 'blue', count: null, label: 'Default' },
+    { name: 'Mitra Umum', desc: 'Agen Representative', icon: <Users size={24} />, color: 'emerald', count: agents.length, label: 'Agen' },
+    { name: 'Back to School', desc: 'Event Sekolah / Expo', icon: <School size={24} />, color: 'amber', count: btsStaff.length, label: 'Tim BTS' },
+    { name: 'Ambassador SGS', desc: 'Mahasiswa Aktif (NIM)', icon: <GraduationCap size={24} />, color: 'indigo', count: students.length, label: 'Ambasador' },
+    { name: 'Employee EGS', desc: 'Dosen & Staff (NIP)', icon: <Briefcase size={24} />, color: 'rose', count: staff.length, label: 'Staff' },
+    { name: 'Kerjasama B2B', desc: 'Instansi & Perusahaan', icon: <Building2 size={24} />, color: 'cyan', count: b2bStaff.length, label: 'Mitra' },
+  ];
+
+  const filteredChannels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const getColorClasses = (color: string) => {
+    switch(color) {
+      case 'emerald': return 'bg-emerald-50 text-emerald-600';
+      case 'amber': return 'bg-amber-50 text-amber-600';
+      case 'indigo': return 'bg-indigo-50 text-indigo-600';
+      case 'rose': return 'bg-rose-50 text-rose-600';
+      case 'cyan': return 'bg-cyan-50 text-cyan-600';
+      default: return 'bg-blue-50 text-blue-600';
+    }
+  };
+
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20 text-left">
-      <div>
-        <h1 className="text-3xl font-black text-[#002855] uppercase tracking-tight leading-none mb-2 text-left">Kanal Pendaftaran</h1>
-        <p className="text-slate-400 text-sm font-medium italic text-left">Manajemen jalur & pembuatan QR Code pendaftaran.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[
-          { name: 'Umum', desc: 'Website & Iklan Utama', icon: <Share2 /> },
-          { name: 'Mitra Umum', desc: 'Agen Representative', icon: <Users /> },
-          { name: 'Back to School', desc: 'Event Sekolah / Expo', icon: <School /> },
-          { name: 'Ambassador SGS', desc: 'Mahasiswa Aktif (NIM)', icon: <GraduationCap /> },
-          { name: 'Employee EGS', desc: 'Dosen & Staff (NIP)', icon: <Briefcase /> },
-          { name: 'Kerjasama B2B', desc: 'Instansi & Perusahaan', icon: <Building2 /> },
-        ].map((k, i) => (
-          <div key={i} className="bg-white border border-slate-100 rounded-[3rem] p-8 shadow-sm hover:shadow-xl transition-all group flex flex-col justify-between h-80 border-b-4 border-transparent hover:border-blue-600">
-            <div>
-              <div className="p-4 bg-slate-50 text-[#002855] rounded-2xl w-fit group-hover:bg-[#002855] group-hover:text-white transition-all duration-500">{k.icon}</div>
-              <h3 className="text-xl font-black text-[#002855] mt-6 mb-2">{k.name}</h3>
-              <p className="text-slate-400 text-xs font-medium leading-relaxed italic">{k.desc}</p>
-            </div>
-            <button 
-              type="button"
-              onClick={() => setActiveMode(k.name)} 
-              className="w-full py-3.5 bg-slate-50 text-[#002855] rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#002855] hover:text-white transition-all border border-slate-100 shadow-sm"
-            >
-              <LinkIcon size={14} /> Buat Link & QR
-            </button>
+    <div className="bg-[#F8FAFC] min-h-screen p-4 md:p-8 space-y-8 animate-in fade-in duration-700 text-left -mx-4 md:-mx-8 -mt-4 md:-mt-8">
+      
+      {/* HEADER & SEARCH */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pt-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Admin</p>
+            <ChevronRight size={14} className="text-slate-300" />
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">Kanal Pendaftaran</p>
           </div>
-        ))}
+          <h1 className="text-3xl font-black text-[#002855] uppercase tracking-tight leading-none mb-2">Kanal Pendaftaran</h1>
+          <p className="text-slate-500 text-sm font-medium">Manajemen jalur & pembuatan link khusus beserta QR Code.</p>
+        </div>
+        
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input 
+            className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm font-semibold outline-none focus:border-[#002855] focus:ring-2 focus:ring-[#002855]/10 transition-all shadow-sm" 
+            placeholder="Cari kanal..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)} 
+          />
+        </div>
       </div>
 
-      {activeMode && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#002855]/20 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white w-full max-w-xl rounded-[3rem] p-10 shadow-2xl border border-slate-100 animate-in zoom-in-95">
-            <div className="flex justify-between items-center mb-8">
-                <div className="text-left">
-                    <h3 className="text-2xl font-black text-[#002855] uppercase tracking-tight">{activeMode}</h3>
-                    <p className="text-slate-400 text-[10px] font-bold uppercase mt-1 italic tracking-widest">Konfigurasi Jalur & History</p>
+      <div className="h-px w-full bg-gradient-to-r from-slate-200 to-transparent"></div>
+
+      {/* CHANNEL CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredChannels.length === 0 ? (
+          <div className="col-span-full py-10 text-center">
+             <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                 <Search size={24} className="text-slate-300" />
+             </div>
+             <p className="text-[#002855] font-bold text-lg">Kanal Tidak Ditemukan</p>
+          </div>
+        ) : (
+          filteredChannels.map((k, i) => (
+            <div key={i} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:-translate-y-2 hover:shadow-md transition-all duration-300 group flex flex-col justify-between h-full">
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div className={`p-4 rounded-2xl ${getColorClasses(k.color)} transition-colors`}>
+                    {k.icon}
+                  </div>
+                  {k.count !== null && (
+                    <div className="bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-full flex items-center gap-1.5" title="Total Petugas">
+                      <span className="text-xs font-black text-[#002855]">{k.count}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{k.label}</span>
+                    </div>
+                  )}
                 </div>
-                <button type="button" title="Tutup Modal" onClick={closeAll} className="p-3 bg-slate-50 rounded-2xl text-slate-400 hover:text-red-500 transition-all"><X size={24}/></button>
+                
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                  <h3 className="text-xl font-black text-[#002855] tracking-tight">{k.name}</h3>
+                </div>
+                <p className="text-slate-500 text-sm font-medium mb-8">{k.desc}</p>
+              </div>
+              
+              <button 
+                type="button"
+                onClick={() => setActiveMode(k.name)} 
+                className="w-full py-3.5 bg-blue-50/50 text-[#002855] rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#002855] hover:text-white transition-all border border-blue-100/50"
+              >
+                <QrCode size={16} /> Buat Link & QR
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* GENERATOR MODAL */}
+      {activeMode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in text-left">
+          <div className="bg-white w-full max-w-xl rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <div>
+                    <h3 className="text-2xl font-black text-[#002855] uppercase tracking-tight">{activeMode}</h3>
+                    <p className="text-slate-500 text-xs font-semibold mt-1">Konfigurasi Jalur & History Tautan</p>
+                </div>
+                <button type="button" title="Tutup" onClick={closeAll} className="p-2.5 bg-slate-50 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"><X size={20}/></button>
             </div>
 
             {!generatedLink ? (
                 <div className="space-y-6">
                     {activeMode !== 'Umum' ? (
-                        <div className="space-y-4">
-                            <p className="text-[10px] font-black text-slate-400 uppercase text-center tracking-widest leading-none">Pilih Petugas Lapangan</p>
-                            <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar pr-2">
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Pilih Petugas / Tim</label>
+                            <div className="space-y-2 max-h-48 overflow-y-auto no-scrollbar pr-2">
                                 {(activeMode === 'Mitra Umum' ? agents : 
                                   activeMode === 'Ambassador SGS' ? students : 
                                   activeMode === 'Employee EGS' ? staff : 
                                   activeMode === 'Back to School' ? btsStaff : b2bStaff).map((p: any) => (
-                                    <button key={p.id} onClick={() => handleSelectPartner(p)} className={`w-full p-4 rounded-2xl flex justify-between items-center transition-all ${selectedPartner?.id === p.id ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 hover:bg-blue-50 text-[#002855]'}`}>
-                                        <div className="text-left text-xs font-bold">{p.name} <span className="block text-[9px] opacity-60 uppercase">{p.referralCode || p.nim || p.nip || p.bts_id || p.b2b_id}</span></div>
-                                        {selectedPartner?.id === p.id && <Check size={16}/>}
+                                    <button key={p.id} onClick={() => handleSelectPartner(p)} className={`w-full p-4 rounded-2xl flex justify-between items-center transition-all border ${selectedPartner?.id === p.id ? 'bg-[#002855] text-white border-[#002855] shadow-lg' : 'bg-white border-slate-100 hover:border-blue-300 text-[#002855]'}`}>
+                                        <div className="text-left">
+                                            <span className="text-sm font-bold block leading-tight">{p.name}</span>
+                                            <span className={`text-[10px] font-semibold uppercase mt-0.5 block ${selectedPartner?.id === p.id ? 'text-blue-200' : 'text-slate-400'}`}>ID: {p.referralCode || p.nim || p.nip || p.bts_id || p.b2b_id}</span>
+                                        </div>
+                                        {selectedPartner?.id === p.id && <Check size={18} className="text-white"/>}
                                     </button>
                                 ))}
                             </div>
                         </div>
-                    ) : <p className="text-sm text-slate-500 italic text-center py-6">Link umum langsung ke form pendaftaran utama.</p>}
+                    ) : <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 text-center"><p className="text-sm text-blue-700 font-semibold">Kanal Umum mengarah langsung ke halaman formulir pendaftaran utama tanpa afiliasi.</p></div>}
 
                     {/* --- BAGIAN HISTORY LOKASI --- */}
                     {selectedPartner && (activeMode === 'Back to School' || activeMode === 'Kerjasama B2B') && (
-                        <div className="space-y-4 animate-in slide-in-from-top-4">
-                             <div className="flex items-center gap-2 text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">
-                                <Clock size={14}/> History Lokasi {selectedPartner.name}
-                             </div>
-                             <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto no-scrollbar pr-2">
+                        <div className="space-y-3 animate-in slide-in-from-top-4 pt-4 border-t border-slate-100">
+                             <label className="flex items-center gap-2 text-xs font-black text-[#002855] uppercase tracking-widest">
+                                <Clock size={16}/> History Lokasi
+                             </label>
+                             <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto no-scrollbar pr-2">
                                 {partnerHistory.length > 0 ? partnerHistory.map((h: any) => (
-                                    <button key={h.id} onClick={() => handleGenerateAction(h.location_slug, h.location_name)} className="w-full p-4 bg-blue-50 hover:bg-blue-600 hover:text-white rounded-2xl text-left flex justify-between items-center group transition-all">
-                                        <span className="text-xs font-bold uppercase">{h.location_name}</span>
-                                        <QrCode size={16} className="text-blue-400 group-hover:text-white transition-all"/>
+                                    <button key={h.id} onClick={() => handleGenerateAction(h.location_slug, h.location_name)} className="w-full px-4 py-3 bg-slate-50 hover:bg-[#002855] hover:text-white rounded-xl text-left flex justify-between items-center group transition-all border border-slate-100 hover:border-[#002855]">
+                                        <span className="text-sm font-bold capitalize">{h.location_name}</span>
+                                        <QrCode size={16} className="text-slate-400 group-hover:text-white transition-all"/>
                                     </button>
                                 )) : (
-                                    <p className="text-[9px] text-slate-400 italic text-center py-2 uppercase">Belum ada history lokasi.</p>
+                                    <p className="text-xs text-slate-400 italic text-center py-2 bg-slate-50 rounded-xl">Belum ada history lokasi.</p>
                                 )}
                                 {!isAddingNew && (
-                                    <button onClick={() => setIsAddingNew(true)} className="w-full p-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 hover:border-blue-400 hover:text-blue-600 transition-all flex items-center justify-center gap-2 text-xs font-bold">
+                                    <button onClick={() => setIsAddingNew(true)} className="w-full px-4 py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-sm font-bold">
                                         <Plus size={16}/> Tambah Lokasi Baru
                                     </button>
                                 )}
@@ -215,32 +280,40 @@ const KanalPage = () => {
 
                     {/* --- INPUT BARU --- */}
                     {(activeMode === 'Umum' || isAddingNew) && (
-                        <div className="space-y-2 animate-in slide-in-from-top-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{activeMode === 'Back to School' ? 'Nama Sekolah' : 'Nama Instansi'}</label>
-                            <input placeholder="Ketik nama lokasi baru..." className="w-full p-5 bg-slate-50 rounded-2xl font-bold border-none outline-none focus:ring-4 focus:ring-blue-500/10" value={textInput} onChange={(e) => setTextInput(e.target.value)} />
+                        <div className="space-y-2 animate-in slide-in-from-top-2 pt-2">
+                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{activeMode === 'Back to School' ? 'Nama Sekolah Baru' : activeMode === 'Kerjasama B2B' ? 'Nama Instansi Baru' : ''}</label>
+                            {activeMode !== 'Umum' && (
+                                <input placeholder="Ketik nama lokasi..." className="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-xl font-semibold outline-none focus:border-[#002855] focus:ring-4 focus:ring-[#002855]/10 transition-all" value={textInput} onChange={(e) => setTextInput(e.target.value)} />
+                            )}
                         </div>
                     )}
 
                     { (activeMode === 'Umum' || isAddingNew || (selectedPartner && !['Back to School', 'Kerjasama B2B'].includes(activeMode))) && (
-                        <button onClick={() => handleGenerateAction()} className="w-full py-5 bg-[#002855] text-white rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:bg-blue-800 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <button onClick={() => handleGenerateAction()} className="w-full py-4 mt-2 bg-[#002855] text-white rounded-xl font-black uppercase text-sm tracking-widest shadow-lg hover:bg-blue-800 transition-all flex items-center justify-center gap-2">
                             <QrCode size={18}/> Generate QR Sekarang
                         </button>
                     )}
                 </div>
             ) : (
-                <div className="text-center space-y-8 animate-in slide-in-from-bottom-4">
-                    <div className="bg-white p-6 rounded-[2.5rem] shadow-xl inline-block mx-auto border-4 border-slate-50"><QRCodeSVG id="main-qr" value={generatedLink} size={220} /></div>
-                    <div className="text-center">
-                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2 leading-none">Tautan Siap Pakai</p>
-                        <p className="text-sm font-bold text-[#002855] break-all bg-slate-50 p-5 rounded-2xl border border-slate-100 shadow-inner">{generatedLink}</p>
+                <div className="text-center space-y-6 animate-in slide-in-from-bottom-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-3xl inline-block mx-auto border border-blue-100 shadow-xl relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-1.5 bg-[#002855]"></div>
+                      <QRCodeSVG id="main-qr" value={generatedLink} size={220} className="mx-auto" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <button title="Salin" onClick={() => { navigator.clipboard.writeText(generatedLink); toast.success("Disalin!"); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="py-4 bg-slate-100 text-[#002855] rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 transition-all">
-                            {copied ? <Check size={16}/> : <Copy size={16}/>} {copied ? 'Berhasil' : 'Salin'}
-                        </button>
-                        <button title="Download" onClick={downloadQR} className="py-4 bg-[#002855] text-white rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 shadow-lg hover:bg-blue-800 transition-all"><Download size={16}/> Download</button>
+                    
+                    <div className="text-left">
+                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Tautan Pendaftaran</p>
+                        <div className="flex items-center bg-slate-50 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
+                           <div className="flex-1 truncate px-3 text-sm font-semibold text-[#002855]">{generatedLink}</div>
+                           <button title="Salin" onClick={() => { navigator.clipboard.writeText(generatedLink); toast.success("Disalin!"); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="px-5 py-2.5 bg-white border border-slate-200 text-[#002855] rounded-xl font-bold text-xs uppercase flex items-center gap-2 hover:bg-slate-100 transition-all shadow-sm shrink-0">
+                               {copied ? <Check size={16} className="text-emerald-500"/> : <Copy size={16}/>} {copied ? 'Tersalin' : 'Copy'}
+                           </button>
+                        </div>
                     </div>
-                    <button onClick={() => { setGeneratedLink(''); setIsAddingNew(false); }} className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-blue-600 transition-colors">Kembali / Buat Lagi</button>
+                    
+                    <button title="Download" onClick={downloadQR} className="w-full py-4 bg-[#002855] text-white rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg hover:bg-blue-800 transition-all"><Download size={18}/> Download QR Code</button>
+                    
+                    <button onClick={() => { setGeneratedLink(''); setIsAddingNew(false); }} className="text-xs font-bold text-slate-400 hover:text-[#002855] transition-colors mt-2 uppercase tracking-widest">Kembali / Buat Lagi</button>
                 </div>
             )}
           </div>

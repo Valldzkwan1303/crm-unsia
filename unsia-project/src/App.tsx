@@ -14,7 +14,6 @@ import DashboardHome from './pages/admin/DashboardHome';
 import CRMPage from './pages/admin/CRMPage';
 import KanalPage from './pages/admin/KanalPage';
 import AgenPage from './pages/admin/AgenPage';
-import EmailPage from './pages/admin/EmailPage';
 import ReferensiPage from './pages/admin/ReferensiPage';
 import SgsPage from './pages/admin/SgsPage';
 import EgsPage from './pages/admin/EgsPage';
@@ -56,7 +55,6 @@ export default function App() {
           <Route path="bts" element={<BtsPage />} />
           <Route path="b2b" element={<B2bPage />} />
           <Route path="agen" element={<AgenPage />} />
-          <Route path="email" element={<EmailPage />} />
           <Route path="referensi" element={<ReferensiPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="sgs" element={<SgsPage />} />

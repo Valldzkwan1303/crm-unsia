@@ -8,7 +8,7 @@ export default function NewsSection() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section id="berita" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="text-left"><h2 className="text-[#002855] text-sm font-black tracking-widest uppercase mb-4">Latest Updates</h2><h3 className="text-3xl md:text-5xl font-black text-[#002855]">Berita & Acara Terkini</h3></div>
@@ -16,13 +16,15 @@ export default function NewsSection() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {news.map((item, i) => (
-            <article key={i} className="group cursor-pointer">
-              <div className="relative h-64 overflow-hidden rounded-3xl mb-6">
+            <article key={i} className="group cursor-pointer bg-slate-50 p-4 rounded-[2rem] hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-slate-100/50">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-3xl mb-6 shadow-sm">
                 <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.title} />
-                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-[#002855] shadow-lg">{item.cat}</div>
+                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-600 shadow-lg border border-white">{item.cat}</div>
               </div>
-              <div className="flex items-center gap-4 mb-4"><div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-wider"><Calendar size={14} /> {item.date}</div><div className="h-0.5 flex-grow bg-gray-100"></div></div>
-              <h4 className="text-xl font-black text-[#002855] group-hover:text-blue-600 transition-colors leading-snug">{item.title}</h4>
+              <div className="px-2">
+                <div className="flex items-center gap-4 mb-4"><div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider"><Calendar size={14} /> {item.date}</div><div className="h-px flex-grow bg-slate-200"></div></div>
+                <h4 className="text-xl font-black text-[#002855] group-hover:text-blue-600 transition-colors duration-500 leading-snug line-clamp-3">{item.title}</h4>
+              </div>
             </article>
           ))}
         </div>

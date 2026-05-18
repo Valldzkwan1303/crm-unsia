@@ -65,6 +65,20 @@ class DashboardController extends Controller
                 $balance = Wallet::where('user_id', $user->id)->value('balance');
             }
 
+            // LEADERBOARD TOP 5 PARTNER
+            $leaderboard = User::where('role', 'agent')
+                ->withCount('leads')
+                ->with('wallet')
+                ->get()
+                ->map(fn($agent) => [
+                    'name' => $agent->name,
+                    'leads_count' => $agent->leads_count,
+                    'commission' => $agent->wallet ? (float)$agent->wallet->balance : 0,
+                ])
+                ->sortByDesc('leads_count')
+                ->take(5)
+                ->values();
+
             return response()->json([
                 'stats' => [
                     'total_referrals' => $referrals->count(),
@@ -80,7 +94,8 @@ class DashboardController extends Controller
                 'referral_link' => ($type === 'umum')
                     ? url('/p/' . $agentCode)
                     : url('/join?ref=' . $agentCode),
-                'chart_data' => $this->calculateDailyTrends($user->id)
+                'chart_data' => $this->calculateDailyTrends($user->id),
+                'leaderboard' => $leaderboard
             ]);
 
         } catch (\Exception $e) {

@@ -10,6 +10,10 @@
   --unsia-accent: #3B82F6;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
   @apply bg-[#FDFDFD] text-slate-800 antialiased;
@@ -26,3 +30,18 @@ body {
 }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Cyber Dot Pattern — UNSIA identity ── */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(0, 40, 85, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Subtle Grid Pattern ── */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(0, 40, 85, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 40, 85, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
